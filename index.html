@@ -1,0 +1,438 @@
+
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Giftly | Сыйлық кеңесшісі</title>
+<style>
+:root{--p:#7357e8;--bg:#f6f5fb;--ink:#25213a;--muted:#77738b;--line:#e8e5f0;--white:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,sans-serif}
+button,input,select{font:inherit}
+button{border:0;border-radius:10px;padding:11px 15px;cursor:pointer;font-weight:700}
+button:disabled{opacity:.5;cursor:not-allowed}
+.primary{background:var(--p);color:white}
+.secondary{background:#eeeaff;color:var(--p)}
+header{position:sticky;top:0;z-index:5;background:white;box-shadow:0 2px 15px #25213a0c;padding:15px 5%;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.logo{font-size:26px;font-weight:900;color:var(--p)}
+nav{display:flex;gap:8px;flex-wrap:wrap}
+.hero{padding:55px 6%;display:grid;grid-template-columns:1.4fr 1fr;gap:25px;align-items:center;background:linear-gradient(120deg,#ece7ff,#fff3ec)}
+.hero h1{font-size:clamp(34px,5vw,58px);line-height:1.08;margin:12px 0}
+.hero-art{text-align:center;font-size:100px}
+.muted{color:var(--muted);line-height:1.6}
+main{max-width:1250px;margin:auto;padding:28px 20px}
+.layout{display:grid;grid-template-columns:285px 1fr;gap:22px}
+.panel,.gift,.auth{background:white;border-radius:18px;box-shadow:0 5px 25px #25213a0b}
+.panel{padding:22px}
+label{display:block;font-weight:700;margin:14px 0 7px}
+input,select{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:white;color:var(--ink)}
+input:focus,select:focus{outline:2px solid #d7ceff;border-color:var(--p)}
+.catalog-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+.catalog-head input{max-width:260px}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.gift{overflow:hidden}
+.emoji{height:140px;background:#f0edff;display:grid;place-items:center;font-size:55px}
+.gift-body{padding:16px}
+.gift h3{margin:0 0 9px}
+.price{font-size:18px;font-weight:900;color:var(--p);margin:12px 0}
+.tag{font-size:12px;color:var(--muted)}
+.actions{display:flex;gap:7px;margin-top:12px}
+.actions button{flex:1;padding:9px 5px;font-size:13px}
+.section{margin-top:28px}
+.auth{max-width:480px;margin:25px auto;padding:24px}
+.auth button{margin-top:12px}
+.status{padding:12px;background:#f0edff;border-radius:10px;margin-top:12px;line-height:1.5}
+.hidden{display:none!important}
+.pill{display:inline-block;border-radius:99px;background:#eeeaff;color:var(--p);padding:6px 10px;font-size:12px}
+.empty{background:white;padding:25px;border-radius:14px;color:var(--muted)}
+footer{text-align:center;padding:28px;color:var(--muted)}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.hero{grid-template-columns:1fr}.hero-art{display:none}}
+@media(max-width:550px){header{align-items:flex-start;flex-direction:column}.grid{grid-template-columns:1fr}.catalog-head{align-items:stretch;flex-direction:column}.catalog-head input{max-width:none}main{padding:16px 12px}.hero{padding:35px 20px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">🎁 Giftly</div>
+  <nav>
+    <button class="secondary" onclick="showCatalog()">Каталог</button>
+    <button class="secondary" onclick="loadFavorites()">♡ Таңдаулылар</button>
+    <button class="primary" id="authNav" onclick="openAuth('login')">Кіру</button>
+    <button class="secondary hidden" id="logoutBtn" onclick="logout()">Шығу</button>
+  </nav>
+</header>
+
+<section class="hero">
+  <div>
+    <span class="pill">ЖЕКЕ СЫЙЛЫҚ ҰСЫНУ ЖҮЙЕСІ</span>
+    <h1>Жақыныңызға ерекше сыйлық табыңыз!</h1>
+    <p class="muted">Алушыны, қызығушылығын және бюджетіңізді таңдаңыз. Giftly сізге лайықты сыйлық идеяларын ұсынады.</p>
+    <button class="primary" onclick="document.getElementById('recommend').scrollIntoView({behavior:'smooth'})">Сыйлық таңдау →</button>
+  </div>
+  <div class="hero-art">🎁💝🎈</div>
+</section>
+
+<main>
+  <section class="layout section" id="recommend">
+    <aside class="panel">
+      <h2>Сыйлық параметрлері</h2>
+      <form id="recommendForm">
+        <label for="recipient">Кімге арналған?</label>
+        <select id="recipient">
+          <option value="friend">Досқа</option>
+          <option value="mother">Анаға</option>
+          <option value="father">Әкеге</option>
+          <option value="brother">Ағаға / Ініге</option>
+          <option value="sister">Әпкеге / Қарындасқа</option>
+          <option value="partner">Сүйікті адамға</option>
+        </select>
+        <label for="age">Жасы</label>
+        <input id="age" type="number" min="1" max="120" value="23" required>
+        <label for="occasion">Мереке</label>
+        <select id="occasion">
+          <option value="birthday">Туған күн</option>
+          <option value="newyear">Жаңа жыл</option>
+          <option value="anniversary">Мерейтой</option>
+          <option value="justbecause">Жай ғана қуантқым келеді</option>
+        </select>
+        <label for="interest">Қызығушылығы</label>
+        <select id="interest">
+          <option value="technology">Технология</option>
+          <option value="music">Музыка</option>
+          <option value="sport">Спорт</option>
+          <option value="books">Кітап</option>
+          <option value="travel">Саяхат</option>
+          <option value="beauty">Сұлулық</option>
+          <option value="gaming">Ойын</option>
+          <option value="home">Үйге арналған заттар</option>
+        </select>
+        <label for="budget">Ең жоғары бюджет</label>
+        <select id="budget">
+          <option value="10000">10 000 ₸ дейін</option>
+          <option value="25000">25 000 ₸ дейін</option>
+          <option value="50000" selected>50 000 ₸ дейін</option>
+          <option value="100000">100 000 ₸ дейін</option>
+        </select>
+        <button class="primary" style="width:100%;margin-top:18px">Ұсыныс алу ✨</button>
+      </form>
+      <div id="recommendStatus" class="status hidden"></div>
+    </aside>
+
+    <section id="catalog">
+      <div class="catalog-head">
+        <div>
+          <h2 style="margin:0 0 6px">Сыйлықтар каталогы</h2>
+          <div id="resultCount" class="muted">Жүктелуде...</div>
+        </div>
+        <input id="search" placeholder="🔎 Сыйлық іздеу...">
+      </div>
+      <div class="grid" id="giftGrid"></div>
+    </section>
+  </section>
+
+  <section class="section panel hidden" id="favoritesSection">
+    <h2>♡ Таңдаулылар</h2>
+    <p class="muted" id="favoriteHint"></p>
+    <div class="grid" id="favoriteGrid"></div>
+  </section>
+
+  <section class="auth hidden" id="authSection">
+    <h2 id="authTitle">Аккаунтқа кіру</h2>
+    <p class="muted">Таңдаулыларды аккаунтыңызға сақтау үшін тіркеліңіз немесе кіріңіз.</p>
+    <form id="authForm">
+      <div id="nameField" class="hidden">
+        <label for="authName">Аты-жөніңіз</label>
+        <input id="authName" maxlength="100" autocomplete="name">
+      </div>
+      <label for="authEmail">Email</label>
+      <input id="authEmail" type="email" required autocomplete="email" placeholder="you@example.com">
+      <label for="authPassword">Құпиясөз</label>
+      <input id="authPassword" type="password" minlength="8" required autocomplete="current-password" placeholder="Кемінде 8 таңба">
+      <button class="primary" id="authSubmit" style="width:100%">Кіру</button>
+    </form>
+    <div id="authMessage" class="status hidden"></div>
+    <button class="secondary" style="width:100%" onclick="toggleAuthMode()">Тіркелу / Кіру режимін ауыстыру</button>
+  </section>
+
+  <section class="section panel">
+    <h2>Жоба туралы</h2>
+    <p class="muted">Giftly — сыйлық таңдау процесін жеңілдететін Full Stack демонстрациялық жоба. Frontend HTML, CSS және JavaScript негізінде жасалған. Backend Node.js және Express арқылы REST API ұсынады. PostgreSQL пайдаланушылар, сыйлықтар және таңдаулыларды сақтайды.</p>
+    <div class="pill">HTML / CSS / JavaScript</div>
+    <div class="pill">Node.js / Express</div>
+    <div class="pill">PostgreSQL</div>
+    <div class="pill">REST API / JWT</div>
+  </section>
+</main>
+
+<footer>🎁 Giftly — дұрыс сыйлық, жақсы естелік. <span id="connectionStatus">Сервер тексерілуде...</span></footer>
+
+<script>
+"use strict";
+
+const API = "http://localhost:3000/api";
+let gifts = [];
+let token = localStorage.getItem("giftlyToken") || "";
+let favorites = new Set();
+let authMode = "login";
+let favoriteView = false;
+
+const demoGifts = [
+  {id:1,name:"Сымсыз құлаққап",price:18000,category:"technology",emoji:"🎧",description:"Музыка мен күнделікті қолдануға"},
+  {id:2,name:"Сапалы термос",price:8500,category:"home",emoji:"☕",description:"Күнделікті пайдалы сыйлық"},
+  {id:3,name:"Кітаптар жинағы",price:12000,category:"books",emoji:"📚",description:"Кітап оқуды жақсы көретін адамға"},
+  {id:4,name:"Спорттық сөмке",price:16000,category:"sport",emoji:"🏋️",description:"Жаттығуға арналған"},
+  {id:5,name:"Үстел ойыны",price:9500,category:"gaming",emoji:"🎲",description:"Достармен бірге ойнауға"},
+  {id:6,name:"Гүл шоғы",price:15000,category:"beauty",emoji:"💐",description:"Жақын адамыңызға"},
+  {id:7,name:"Bluetooth динамик",price:24000,category:"music",emoji:"🔊",description:"Сүйікті әуен әрдайым бірге"},
+  {id:8,name:"Саяхат рюкзагы",price:32000,category:"travel",emoji:"🎒",description:"Саяхат пен серуенге"},
+  {id:9,name:"Смарт сағат",price:45000,category:"technology",emoji:"⌚",description:"Белсенді өмір салтына"}
+];
+
+function money(value) {
+  return new Intl.NumberFormat("kk-KZ").format(Number(value)) + " ₸";
+}
+
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, c => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  })[c]);
+}
+
+async function api(path, options = {}) {
+  const headers = {...(options.headers || {})};
+  if (options.body) headers["Content-Type"] = "application/json";
+  if (token) headers.Authorization = "Bearer " + token;
+  const response = await fetch(API + path, {...options, headers});
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    if (response.status === 401 && token) {
+      token = "";
+      localStorage.removeItem("giftlyToken");
+      updateAuthNav();
+    }
+    throw new Error(data.message || "Сұраныс орындалмады");
+  }
+  return data;
+}
+
+function setStatus(id, message, show = true) {
+  const el = document.getElementById(id);
+  el.textContent = message;
+  el.classList.toggle("hidden", !show);
+}
+
+function updateAuthNav() {
+  document.getElementById("authNav").classList.toggle("hidden", Boolean(token));
+  document.getElementById("logoutBtn").classList.toggle("hidden", !token);
+}
+
+function renderGifts(items, target = "giftGrid") {
+  const grid = document.getElementById(target);
+  if (!items.length) {
+    grid.innerHTML = '<div class="empty">Сәйкес сыйлық табылмады.</div>';
+    if (target === "giftGrid") document.getElementById("resultCount").textContent = "0 сыйлық";
+    return;
+  }
+  grid.innerHTML = items.map(g => {
+    const id = Number(g.id);
+    const saved = favorites.has(id);
+    return `
+      <article class="gift">
+        <div class="emoji">${escapeHTML(g.emoji || "🎁")}</div>
+        <div class="gift-body">
+          <h3>${escapeHTML(g.name)}</h3>
+          <div class="muted">${escapeHTML(g.description || "Сыйлық идеясы")}</div>
+          <div class="price">${money(g.price)}</div>
+          <div class="tag">Санат: ${escapeHTML(g.category || "басқа")}</div>
+          <div class="actions">
+            <button class="secondary" onclick="toggleFavorite(${id})">${saved ? "♥ Сақталды" : "♡ Таңдау"}</button>
+            <button class="primary" onclick="giftDetails(${id})">Толығырақ</button>
+          </div>
+        </div>
+      </article>`;
+  }).join("");
+  if (target === "giftGrid") {
+    document.getElementById("resultCount").textContent = `${items.length} сыйлық табылды`;
+  }
+}
+
+function currentList() {
+  const q = document.getElementById("search").value.toLowerCase().trim();
+  let list = gifts.filter(g =>
+    `${g.name} ${g.description || ""} ${g.category || ""}`.toLowerCase().includes(q)
+  );
+  if (favoriteView) list = list.filter(g => favorites.has(Number(g.id)));
+  return list;
+}
+
+function refreshCatalog() {
+  renderGifts(currentList());
+}
+
+async function loadGifts() {
+  try {
+    const data = await api("/gifts");
+    gifts = Array.isArray(data) ? data : data.gifts || [];
+    document.getElementById("connectionStatus").textContent = "Backend қосылды";
+  } catch (error) {
+    gifts = demoGifts;
+    document.getElementById("connectionStatus").textContent = "Демо режим";
+  }
+  refreshCatalog();
+  if (token) await loadFavorites(false);
+}
+
+async function toggleFavorite(id) {
+  id = Number(id);
+  if (favorites.has(id)) {
+    favorites.delete(id);
+    if (token) {
+      try { await api("/favorites/" + id, {method:"DELETE"}); }
+      catch (e) { setStatus("recommendStatus", "Серверден жою қатесі: " + e.message); }
+    }
+  } else {
+    favorites.add(id);
+    if (token) {
+      try { await api("/favorites/" + id, {method:"POST"}); }
+      catch (e) {
+        favorites.delete(id);
+        setStatus("recommendStatus", "Таңдаулыны сақтау қатесі: " + e.message);
+      }
+    }
+  }
+  refreshCatalog();
+  if (!document.getElementById("favoritesSection").classList.contains("hidden")) {
+    renderGifts(gifts.filter(g => favorites.has(Number(g.id))), "favoriteGrid");
+  }
+}
+
+async function loadFavorites(scroll = true) {
+  document.getElementById("favoritesSection").classList.remove("hidden");
+  favoriteView = false;
+  if (token) {
+    try {
+      const data = await api("/favorites");
+      favorites = new Set((data.favorites || []).map(g => Number(g.id)));
+      setStatus("favoriteHint", "Таңдаулылар аккаунтыңыздан жүктелді.", true);
+    } catch (error) {
+      setStatus("favoriteHint", "Серверден жүктеу мүмкін болмады: " + error.message, true);
+    }
+  } else {
+    setStatus("favoriteHint", "Қазір таңдаулылар осы браузерде ғана сақталады. Серверде сақтау үшін жүйеге кіріңіз.", true);
+  }
+  renderGifts(gifts.filter(g => favorites.has(Number(g.id))), "favoriteGrid");
+  refreshCatalog();
+  if (scroll) document.getElementById("favoritesSection").scrollIntoView({behavior:"smooth"});
+}
+
+function giftDetails(id) {
+  const gift = gifts.find(g => Number(g.id) === Number(id));
+  if (gift) alert(`${gift.name}\nБағасы: ${money(gift.price)}\nСанаты: ${gift.category}\n\n${gift.description || ""}`);
+}
+
+function showCatalog() {
+  favoriteView = false;
+  document.getElementById("favoritesSection").classList.add("hidden");
+  document.getElementById("catalog").scrollIntoView({behavior:"smooth"});
+  refreshCatalog();
+}
+
+document.getElementById("search").addEventListener("input", () => {
+  favoriteView = false;
+  refreshCatalog();
+});
+
+document.getElementById("recommendForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  const preferences = {
+    recipient: document.getElementById("recipient").value,
+    age: Number(document.getElementById("age").value),
+    occasion: document.getElementById("occasion").value,
+    interest: document.getElementById("interest").value,
+    budget: Number(document.getElementById("budget").value)
+  };
+  if (preferences.age < 1 || preferences.age > 120) {
+    setStatus("recommendStatus", "Жасты 1 мен 120 аралығында енгізіңіз.");
+    return;
+  }
+  try {
+    const data = await api("/gifts/recommend", {
+      method:"POST", body:JSON.stringify(preferences)
+    });
+    gifts = data.gifts || [];
+    setStatus("recommendStatus", "Сізге сәйкес ұсыныстар дайын!");
+  } catch {
+    gifts = demoGifts
+      .filter(g => Number(g.price) <= preferences.budget)
+      .sort((a,b) =>
+        Number(b.category === preferences.interest) -
+        Number(a.category === preferences.interest)
+      );
+    setStatus("recommendStatus", "Демо ұсыныстар көрсетілді. Backend қосылса, ұсыныстар PostgreSQL-ден алынады.");
+  }
+  favoriteView = false;
+  document.getElementById("search").value = "";
+  renderGifts(gifts);
+});
+
+function openAuth(mode) {
+  authMode = mode;
+  updateAuthForm();
+  document.getElementById("authSection").classList.remove("hidden");
+  document.getElementById("authSection").scrollIntoView({behavior:"smooth"});
+}
+
+function toggleAuthMode() {
+  authMode = authMode === "login" ? "register" : "login";
+  updateAuthForm();
+}
+
+function updateAuthForm() {
+  const registering = authMode === "register";
+  document.getElementById("authTitle").textContent = registering ? "Аккаунт ашу" : "Аккаунтқа кіру";
+  document.getElementById("authSubmit").textContent = registering ? "Тіркелу" : "Кіру";
+  document.getElementById("nameField").classList.toggle("hidden", !registering);
+  document.getElementById("authName").required = registering;
+  document.getElementById("authPassword").autocomplete = registering ? "new-password" : "current-password";
+  setStatus("authMessage", "", false);
+}
+
+document.getElementById("authForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  const payload = {
+    email: document.getElementById("authEmail").value.trim(),
+    password: document.getElementById("authPassword").value
+  };
+  if (authMode === "register") {
+    payload.name = document.getElementById("authName").value.trim();
+  }
+  try {
+    const data = await api("/auth/" + authMode, {
+      method:"POST", body:JSON.stringify(payload)
+    });
+    if (data.token) {
+      token = data.token;
+      localStorage.setItem("giftlyToken", token);
+      updateAuthNav();
+    }
+    setStatus("authMessage", data.message || "Операция сәтті орындалды.");
+    await loadFavorites(false);
+  } catch (error) {
+    setStatus("authMessage", error.message);
+  }
+});
+
+async function logout() {
+  token = "";
+  localStorage.removeItem("giftlyToken");
+  favorites = new Set();
+  updateAuthNav();
+  refreshCatalog();
+  setStatus("recommendStatus", "Жүйеден шықтыңыз. Браузердегі серверлік таңдаулылар тізімі жаңартылды.");
+}
+
+updateAuthNav();
+loadGifts();
+</script>
+</body>
+</html>

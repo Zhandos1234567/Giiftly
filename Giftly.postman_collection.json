@@ -1,0 +1,65 @@
+{
+  "info": {
+    "name": "Giftly API",
+    "description": "Giftly backend маршруттарын тексеру",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "token", "value": "" },
+    { "key": "giftId", "value": "1" },
+    { "key": "testEmail", "value": "giftly-test@example.com" },
+    { "key": "testPassword", "value": "GiftlyTest123!" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": { "method": "GET", "url": "{{baseUrl}}/api/health" }
+    },
+    {
+      "name": "Register",
+      "event": [{ "listen": "test", "script": { "exec": ["if (pm.response.code === 201) { const d = pm.response.json(); if (d.token) pm.collectionVariables.set('token', d.token); }"] } }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"name\": \"Giftly Test\",\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"{{testPassword}}\"\n}" },
+        "url": "{{baseUrl}}/api/auth/register"
+      }
+    },
+    {
+      "name": "Login",
+      "event": [{ "listen": "test", "script": { "exec": ["if (pm.response.code === 200) { const d = pm.response.json(); if (d.token) pm.collectionVariables.set('token', d.token); }"] } }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"{{testPassword}}\"\n}" },
+        "url": "{{baseUrl}}/api/auth/login"
+      }
+    },
+    {
+      "name": "Get Gifts",
+      "request": { "method": "GET", "url": "{{baseUrl}}/api/gifts" }
+    },
+    {
+      "name": "Recommend Gifts",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"recipient\": \"friend\",\n  \"age\": 23,\n  \"occasion\": \"birthday\",\n  \"interest\": \"technology\",\n  \"budget\": 50000\n}" },
+        "url": "{{baseUrl}}/api/gifts/recommend"
+      }
+    },
+    {
+      "name": "Get Favorites",
+      "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/api/favorites" }
+    },
+    {
+      "name": "Add Favorite",
+      "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/api/favorites/{{giftId}}" }
+    },
+    {
+      "name": "Delete Favorite",
+      "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/api/favorites/{{giftId}}" }
+    }
+  ]
+}
